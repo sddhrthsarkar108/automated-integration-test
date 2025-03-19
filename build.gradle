@@ -1,0 +1,82 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.4'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'com.github.ben-manes.versions' version '0.51.0'
+	id 'com.google.cloud.tools.jib' version '3.4.0' apply false
+}
+
+ext {
+	springBootVersion = '3.2.4'
+	lombokVersion = '1.18.30'
+	springdocVersion = '2.3.0'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+		// Use default Spring Boot logging (Logback)
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		
+		implementation "org.projectlombok:lombok:${lombokVersion}"
+		annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.springframework.kafka:spring-kafka-test'
+	}
+
+	sourceCompatibility = 21
+	targetCompatibility = 21
+}
+
+bootJar { enabled = false }
+
+// Define common Docker configuration for subprojects using Jib
+configure(subprojects.findAll { it.name in ['mod1'] }) {
+	apply plugin: 'com.google.cloud.tools.jib'
+	
+	// Ensure bootJar task runs before jib tasks
+	tasks.named('jib').configure {
+		dependsOn tasks.named('bootJar')
+	}
+}
+
+// Convenience task to build all Docker images
+task buildDockerImages {
+	dependsOn subprojects.findAll { it.name in ['mod1'] }.collect { it.path + ':jibDockerBuild' }
+	description = 'Builds Docker images for all modules'
+	group = 'Docker'
+}
+
+// Convenience task to build and run the application with Docker Compose
+task dockerComposeUp(type: Exec) {
+	dependsOn buildDockerImages
+	commandLine 'docker-compose', 'up', '-d'
+	description = 'Builds all Docker images and starts the application with Docker Compose'
+	group = 'Docker'
+}
+
+// Convenience task to stop and remove Docker Compose containers
+task dockerComposeDown(type: Exec) {
+	commandLine 'docker-compose', 'down'
+	description = 'Stops and removes Docker Compose containers'
+	group = 'Docker'
+}

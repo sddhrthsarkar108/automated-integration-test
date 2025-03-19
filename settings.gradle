@@ -1,0 +1,3 @@
+rootProject.name = 'springboot-e2e'
+
+include 'mod1'

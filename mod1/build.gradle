@@ -1,0 +1,44 @@
+dependencies {
+    // Add Spring Data JPA support
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // Database driver (using H2 for now, change to your actual database if needed)
+    implementation 'com.h2database:h2'
+    
+    // Add Springdoc OpenAPI dependencies for Spring Boot 3
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+}
+
+// Configure the bootJar task to create a properly named jar
+bootJar {
+    archiveBaseName = 'mod1'
+    archiveClassifier = ''
+}
+
+// Configure Jib for Docker image building
+jib {
+    from {
+        image = 'amazoncorretto:21.0.2-alpine'
+    }
+    to {
+        image = "com.example/producer:${project.version}"
+    }
+    container {
+        jvmFlags = [
+//            '-Xms256m',
+//            '-Xmx512m',
+//            '-XX:+UseG1GC',
+//            '-XX:+UseStringDeduplication',
+//            '-Djava.security.egd=file:/dev/./urandom'
+        ]
+        ports = ['8081']
+        environment = [
+//            'SPRING_PROFILES_ACTIVE': 'docker',
+            'SERVER_PORT': '8081',
+            'SPRING_KAFKA_BOOTSTRAP_SERVERS': 'kafka:9092'
+        ]
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
+    // Specify the main class to improve build speed
+    container.mainClass = 'com.sbtl1.mod1.App'
+}
