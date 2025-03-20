@@ -7,6 +7,10 @@ dependencies {
     
     // Add Springdoc OpenAPI dependencies for Spring Boot 3
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    
+    // Add JavaParser dependencies for code analysis
+    implementation 'com.github.javaparser:javaparser-core:3.25.5'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.25.5'
 }
 
 // Configure the bootJar task to create a properly named jar
