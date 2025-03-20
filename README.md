@@ -33,6 +33,7 @@ This project includes a lightweight code flow analyzer that can help you underst
 - **Spring-aware** - Understands Spring Boot components (controllers, services, repositories)
 - **REST API support** - Access code analysis through HTTP endpoints
 - **CLI utilities** - Run analysis directly from the command line
+- **LLM-friendly code snippets** - Extract formatted code snippets for use in AI prompts
 
 ### Ways to Run the Code Analyzer
 
@@ -46,7 +47,7 @@ Start the Spring Boot application with the `codeanalysis` profile:
 
 Then access the code analysis through the REST endpoints:
 
-* Analyze a specific method:
+* Analyze a specific method's call flow:
 ```
 curl http://localhost:32000/mod1/api/codeanalysis/flow/rest/UserController/getUsersAboveAge | jq
 ```
@@ -54,6 +55,26 @@ curl http://localhost:32000/mod1/api/codeanalysis/flow/rest/UserController/getUs
 * Simplified endpoint analysis:
 ```
 curl http://localhost:32000/mod1/api/codeanalysis/endpoint/getUsersAboveAge | jq
+```
+
+* Endpoint analysis with specific controller:
+```
+curl http://localhost:32000/mod1/api/codeanalysis/endpoint/UserController/getUsersAboveAge | jq
+```
+
+* Get code snippets for all methods in the execution path (formatted for LLMs):
+```
+curl http://localhost:32000/mod1/api/codeanalysis/snippets/rest/UserController/getUsersAboveAge
+```
+
+* Simplified code snippets for an endpoint:
+```
+curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/getUsersAboveAge
+```
+
+* Code snippets for an endpoint with specific controller:
+```
+curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/UserController/getUsersAboveAge
 ```
 
 #### 2. Using the Simple Demo Script
@@ -70,7 +91,25 @@ You can also specify the class and method to analyze:
 ./run-simple-analysis.sh com.sbtl1.mod1.service.UserService getUsersByAge
 ```
 
-#### 3. Using the Standalone Demo
+This script uses the `SimpleCallFlowAnalysisDemo` class which provides a lightweight method call analyzer.
+
+#### 3. Using the Call Flow Analysis Script (Alternative Demo)
+
+This project also includes an alternative analysis script that uses a different analyzer implementation:
+
+```shell
+./run-call-analysis.sh
+```
+
+You can also specify the class and method to analyze:
+
+```shell
+./run-call-analysis.sh com.sbtl1.mod1.service.UserService getUsersByAge
+```
+
+This script uses the `CallFlowAnalysisDemo` class which offers similar functionality but with a different implementation strategy.
+
+#### 4. Using the Standalone Demo
 
 Another way to run the analysis is through the standalone demo:
 
@@ -98,6 +137,45 @@ This shows that:
   - `UserService.getUsersByAge()` which calls
     - `UserRepository.findByAgeGreaterThan()`
 
+### Using Code Snippets with LLMs
+
+The code snippets endpoints provide the source code of all methods in the execution path, formatted in Markdown:
+
+```markdown
+# Code Execution Path Analysis
+
+## Call Graph Overview
+
+```
+com.sbtl1.mod1.rest.UserController.getUsersAboveAge
+  com.sbtl1.mod1.service.UserService.getUsersByAge
+    com.sbtl1.mod1.dao.UserRepository.findByAgeGreaterThan
+```
+
+## Method Code Snippets
+
+### com.sbtl1.mod1.rest.UserController.getUsersAboveAge
+
+```java
+public ResponseEntity<List<User>> getUsersAboveAge(@PathVariable int age) {
+    return ResponseEntity.ok(userService.getUsersByAge(age));
+}
+```
+
+### com.sbtl1.mod1.service.UserService.getUsersByAge
+
+```java
+public List<User> getUsersByAge(int age) {
+    if (age < 0) {
+        throw new IllegalArgumentException("Age cannot be negative");
+    }
+    return userRepository.findByAgeGreaterThan(age);
+}
+```
+```
+
+This formatted output is ideal for including in prompts for AI models when you need to explain code behavior.
+
 ### How It Works
 
 The analyzer:
@@ -111,3 +189,7 @@ The analyzer:
 - Analysis is based on static code examination, not runtime behavior
 - Complex language constructs might not be correctly analyzed
 - Dynamic method calls (reflection, lambdas) are not fully supported
+
+### Additional Documentation
+
+For more detailed information about the code flow analyzer, see the `CALL-FLOW-ANALYZER-GUIDE.md` file in the project root.

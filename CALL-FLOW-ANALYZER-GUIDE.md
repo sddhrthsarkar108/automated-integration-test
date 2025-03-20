@@ -20,12 +20,15 @@ The call flow analyzer helps in understanding how methods call each other within
 ## Components
 
 1. `SimpleCodeFlowAnalyzer.java` - The main analyzer class that uses regex to analyze Java code
-2. `SimpleCallFlowAnalysisDemo.java` - Demo application that runs the analyzer
-3. `run-simple-analysis.sh` - Shell script to compile and run the analyzer
+2. `SimpleCallFlowAnalysisDemo.java` - Simplified demo application that runs the analyzer
+3. `CallFlowAnalysisDemo.java` - Alternative implementation of the call flow analyzer demo
+4. `CodeFlowAnalysisRunner.java` - Runner utility for code flow analysis
+5. `run-simple-analysis.sh` - Shell script to compile and run the simplified analyzer using SimpleCallFlowAnalysisDemo
+6. `run-call-analysis.sh` - Shell script to compile and run the alternative analyzer using CallFlowAnalysisDemo
 
 ## How to Use
 
-### 1. Run the analyzer with default settings:
+### 1. Run the simplified analyzer with default settings:
 
 ```bash
 ./run-simple-analysis.sh
@@ -33,13 +36,21 @@ The call flow analyzer helps in understanding how methods call each other within
 
 This will analyze the `getUsersAboveAge` method in the `UserController` by default.
 
-### 2. Specify a different method to analyze:
+### 2. Run the alternative analyzer:
+
+```bash
+./run-call-analysis.sh
+```
+
+### 3. Specify a different method to analyze with either script:
 
 ```bash
 ./run-simple-analysis.sh com.example.package.SomeClassName someMethodName
+# OR
+./run-call-analysis.sh com.example.package.SomeClassName someMethodName
 ```
 
-### 3. Understanding the output:
+### 4. Understanding the output:
 
 The analyzer will print:
 - Files being analyzed
@@ -80,6 +91,16 @@ com.sbtl1.mod1.rest.UserController.getUsersAboveAge
   com.sbtl1.mod1.service.UserService.getUsersByAge
     com.sbtl1.mod1.dao.UserRepository.findByAgeGreaterThan
 ```
+
+## REST API Access
+
+For users who prefer a web interface, the code analyzer can also be accessed through a REST API when the Spring Boot application is running with the `codeanalysis` profile:
+
+```bash
+./gradlew :mod1:bootRun --args="--spring.profiles.active=codeanalysis"
+```
+
+See the main README.md for detailed information about available endpoints.
 
 ## Future Improvements
 
