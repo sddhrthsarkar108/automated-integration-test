@@ -25,30 +25,45 @@ asdf current java 2>&1 > /dev/null
 
 ## Code Flow Analyzer
 
-This project includes a lightweight code flow analyzer that can help you understand how methods call each other within your Spring Boot application. The analyzer doesn't rely on JavaParser, making it compatible with any Java version.
+This project includes a code flow analyzer that helps you understand how methods call each other within your Spring Boot application using **JavaParserCodeFlowAnalyzer** - a robust analyzer that uses JavaParser for enhanced accuracy.
 
 ### Features
 
-- **Dependency-free analysis** - Works with just the JDK
 - **Spring-aware** - Understands Spring Boot components (controllers, services, repositories)
 - **REST API support** - Access code analysis through HTTP endpoints
-- **CLI utilities** - Run analysis directly from the command line
 - **LLM-friendly code snippets** - Extract formatted code snippets for use in AI prompts
 
-### Ways to Run the Code Analyzer
+### Quick Start
 
-#### 1. Using the REST API (Spring Boot Application)
-
-Start the Spring Boot application with the `codeanalysis` profile:
+Use the provided script to quickly analyze a method's call flow:
 
 ```shell
-./gradlew :mod1:bootRun --args="--spring.profiles.active=codeanalysis"
+./run-analysis.sh [ClassName] [methodName]
+```
+
+For example:
+```shell
+./run-analysis.sh com.sbtl1.mod1.rest.UserController getUsersAboveAge
+```
+
+The script will:
+1. Build the project
+2. Start the Spring Boot application with the codeanalysis profile
+3. Call the flow and snippets endpoints
+4. Stop the application when analysis is complete
+
+### Using the Code Analyzer REST API
+
+Start the Spring Boot application:
+
+```shell
+./gradlew :mod1:bootRun
 ```
 
 Then access the code analysis through the REST endpoints:
 
 * Analyze a specific method's call flow:
-```
+```shell
 curl http://localhost:32000/mod1/api/codeanalysis/flow/rest/UserController/getUsersAboveAge | jq
 ```
 
@@ -75,50 +90,6 @@ curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/getUsersAbov
 * Code snippets for an endpoint with specific controller:
 ```
 curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/UserController/getUsersAboveAge
-```
-
-#### 2. Using the Simple Demo Script
-
-For a quick analysis without starting the Spring Boot application:
-
-```shell
-./run-simple-analysis.sh
-```
-
-You can also specify the class and method to analyze:
-
-```shell
-./run-simple-analysis.sh com.sbtl1.mod1.service.UserService getUsersByAge
-```
-
-This script uses the `SimpleCallFlowAnalysisDemo` class which provides a lightweight method call analyzer.
-
-#### 3. Using the Call Flow Analysis Script (Alternative Demo)
-
-This project also includes an alternative analysis script that uses a different analyzer implementation:
-
-```shell
-./run-call-analysis.sh
-```
-
-You can also specify the class and method to analyze:
-
-```shell
-./run-call-analysis.sh com.sbtl1.mod1.service.UserService getUsersByAge
-```
-
-This script uses the `CallFlowAnalysisDemo` class which offers similar functionality but with a different implementation strategy.
-
-#### 4. Using the Standalone Demo
-
-Another way to run the analysis is through the standalone demo:
-
-```shell
-# Compile the necessary files
-javac -d out mod1/src/main/java/com/sbtl1/mod1/util/SimpleCodeFlowAnalyzer.java mod1/src/main/java/com/sbtl1/mod1/util/SimpleCallFlowAnalysisDemo.java
-
-# Run the analysis
-java -cp out com.sbtl1.mod1.util.SimpleCallFlowAnalysisDemo com.sbtl1.mod1.rest.UserController getUsersAboveAge
 ```
 
 ### Understanding the Output
@@ -180,7 +151,7 @@ This formatted output is ideal for including in prompts for AI models when you n
 
 The analyzer:
 1. Locates and reads Java source files
-2. Uses regular expressions to identify method declarations and calls
+2. Parses the source using JavaParser
 3. Follows the chain of calls through the codebase
 4. Builds a call graph representing the flow of execution
 

@@ -4,6 +4,7 @@ build
 .idea
 .vscode/
 bin/
+tmp/
 
 ### Files ###
 !gradle/wrapper/gradle-wrapper.jar
