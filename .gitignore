@@ -9,3 +9,4 @@ tmp/
 ### Files ###
 !gradle/wrapper/gradle-wrapper.jar
 *.class
+*.log

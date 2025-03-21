@@ -57,51 +57,7 @@ public class CodeAnalysisController {
         
         return ResponseEntity.ok(result);
     }
-    
-    /**
-     * Analyzes the call flow for an endpoint (controller method)
-     * 
-     * Example: /api/codeanalysis/endpoint/getUsersAboveAge
-     */
-    @GetMapping("/endpoint/{methodName}")
-    public ResponseEntity<?> analyzeEndpoint(@PathVariable String methodName) {
-        // For simplicity, we'll just look for the method in UserController
-        String controllerClassName = "com.sbtl1.mod1.rest.UserController";
-        
-        // Use JavaParserCodeFlowAnalyzer
-        JavaParserCodeFlowAnalyzer.CallGraph callGraph = codeFlowAnalyzer.analyzeCallFlow(controllerClassName, methodName);
-        
-        if (callGraph == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("startClass", controllerClassName);
-        result.put("startMethod", methodName);
-        
-        // Process the call graph for a more readable output
-        Map<String, Object> callGraphResult = processCallGraph(callGraph);
-        result.put("callGraph", callGraphResult);
-        
-        // Extract the list of files involved
-        Set<String> filesInvolved = callGraph.getClasses();
-        result.put("filesInvolved", filesInvolved);
-        
-        return ResponseEntity.ok(result);
-    }
-    
-    /**
-     * Simplified call flow analysis for a specific endpoint with specified controller
-     * 
-     * Example: /api/codeanalysis/endpoint/UserController/getUsersAboveAge
-     */
-    @GetMapping("/endpoint/{controllerName}/{methodName}")
-    public ResponseEntity<?> analyzeEndpointWithController(
-            @PathVariable String controllerName, 
-            @PathVariable String methodName) {
-        return analyzeCallFlow("rest", controllerName, methodName);
-    }
-    
+
     /**
      * Retrieves code snippets for all methods in the execution path
      * Formats the output for use in LLM prompts
@@ -243,35 +199,6 @@ public class CodeAnalysisController {
         snippets.append("## End of Analysis\n");
         
         return ResponseEntity.ok(snippets.toString());
-    }
-    
-    /**
-     * Simplified snippets endpoint for a specific controller method
-     * 
-     * Example: /api/codeanalysis/snippets/endpoint/getUsersAboveAge
-     */
-    @GetMapping("/snippets/endpoint/{methodName}")
-    public ResponseEntity<String> getEndpointSnippets(@PathVariable String methodName) {
-        // Try to find the controller containing this method
-        String controllerName = findControllerForMethod(methodName);
-        if (controllerName != null) {
-            return getCodeSnippets("rest", controllerName, methodName);
-        }
-        
-        // Fall back to UserController if we couldn't find the method elsewhere
-        return getCodeSnippets("rest", "UserController", methodName);
-    }
-    
-    /**
-     * Simplified snippets endpoint with specified controller
-     * 
-     * Example: /api/codeanalysis/snippets/endpoint/UserController/getUsersAboveAge
-     */
-    @GetMapping("/snippets/endpoint/{controllerName}/{methodName}")
-    public ResponseEntity<String> getEndpointSnippetsWithController(
-            @PathVariable String controllerName,
-            @PathVariable String methodName) {
-        return getCodeSnippets("rest", controllerName, methodName);
     }
     
     /**

@@ -67,29 +67,9 @@ Then access the code analysis through the REST endpoints:
 curl http://localhost:32000/mod1/api/codeanalysis/flow/rest/UserController/getUsersAboveAge | jq
 ```
 
-* Simplified endpoint analysis:
-```
-curl http://localhost:32000/mod1/api/codeanalysis/endpoint/getUsersAboveAge | jq
-```
-
-* Endpoint analysis with specific controller:
-```
-curl http://localhost:32000/mod1/api/codeanalysis/endpoint/UserController/getUsersAboveAge | jq
-```
-
 * Get code snippets for all methods in the execution path (formatted for LLMs):
-```
+```shell
 curl http://localhost:32000/mod1/api/codeanalysis/snippets/rest/UserController/getUsersAboveAge
-```
-
-* Simplified code snippets for an endpoint:
-```
-curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/getUsersAboveAge
-```
-
-* Code snippets for an endpoint with specific controller:
-```
-curl http://localhost:32000/mod1/api/codeanalysis/snippets/endpoint/UserController/getUsersAboveAge
 ```
 
 ### Understanding the Output
